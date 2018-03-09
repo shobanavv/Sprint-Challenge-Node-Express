@@ -10,52 +10,59 @@ const app = express();
 
 app.use(bodyParser.json());
 
-app.get('/compare',(req,res) =>{
-    const placeName = req.query.search;
-    fetch(URI_CURRENT_PRICE)
-    .then(res => res.json())
-    .then(current => {
-      res.status(200);
-      res.send({current});
-    })
+const API_ARR = [URI_CURRENT_PRICE, URI_PREVIOUS_DAY_PRICE];
 
-    .catch(err =>{
+// app.get('/compare',(req,res) =>{
+//     const placeName = req.query.search;
+//     fetch(URI_CURRENT_PRICE)
+//     .then(res => res.json())
+//     .then(current => {
+//       res.status(200);
+//       res.send({current});
+//     })
+
+//     .catch(err =>{
+//         res.status(422);
+//         res.send({error:"error occured"});
+//     });
+    
+// })
+
+app.get('/compare',(req,res) => {
+  const bpiPromises = API_ARR.map(uri => {
+  fetch(uri)
+  .then(res => res.json())
+  .then(current => { // got places object.
+    console.log(current);
+    return current.bpi;
+  })
+    fetch(uri)
+  .then(res => res.json())
+  .then(res => {
+    console.log(res.bpi);
+    return res.bpi;
+  })
+  .catch(err =>{
         res.status(422);
         res.send({error:"error occured"});
-    });
+})
+     
+     Promise.all(bpiPromises) 
+     const comments = '';
+        if(bpiPromises[0]>bpiPromises[1]) return comments = 'raisen'
+        else return comments = 'fallen';
+     .then(comments => {
+      res.status(200);
+      res.send({result: comments})
+     })
+     .catch(err =>{
+        res.status(422);
+        res.send({error:"error occured"});
+    })
     
 })
+  
 
-// app.get('/compare',(req,res) => {
-//   const placeNames = req.query.search;
-//   fetch(URI_CURRENT_PRICE)
-//   .then(res => res.json())
-//   .then(current => { // got places object.
-//     console.log(current);
-
-//   fetch(URI_PREVIOUS_DAY_PRICE)
-//         .then(detailed => detailed.json())
-//         .then(detailed => detailed.result);
-
-// })
-//      Promise.all(details) 
-//      .then(details => {
-//       const comment = '';
-//       if(current>previous) comment = 'risen';
-//       else comment = 'fallen';
-//       res.status(200);
-//       res.send({result: comment})
-//      })
-//      .catch(err =>{
-//         res.status(422);
-//         res.send({error:"error occured"});
-//     })
-// })
-//   .catch(err =>{
-//         res.status(422);
-//         res.send({error:"error occured"});
-// })
-// })
 
 app.listen(PORT, err => {
     if(err) {
